@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Symfony\Component\HttpFoundation\Response;
 
 class AuthController extends Controller
@@ -21,12 +22,12 @@ class AuthController extends Controller
         $input = $request->all();
         $input['password'] = bcrypt($input['password']);
         $user = User::create($input);
-        $data['token'] =  $user->createToken('MyApp')->accessToken;
-        $data['name'] =  $user->name;
+        $data['token'] = $user->createToken('MyApp')->accessToken;
+        $data['name'] = $user->name;
 
         $response = [
-          'data' => $data,
-          'message' => 'success'
+            'data' => $data,
+            'message' => 'success'
         ];
 
         return response()->json($response, Response::HTTP_CREATED);
@@ -38,17 +39,30 @@ class AuthController extends Controller
      * @param LoginUserRequest $request
      * @return JsonResponse
      */
-    public function login(LoginUserRequest $request): JsonResponse
+    public function login(LoginUserRequest $request)
     {
-        if(Auth::attempt(['email' => $request->email, 'password' => $request->password])){
-            $user = Auth::user();
-            $success['token'] =  $user->createToken('MyApp')-> accessToken;
-            $success['name'] =  $user->name;
+        $user = User::where('email', $request->email)->first();
 
-            return $this->sendResponse($success, 'User login successfully.');
+        if ($user) {
+            if (Hash::check($request->password, $user->password)) {
+
+                $data['token'] = $user->createToken('MyApp')->accessToken;
+                $data['name'] = $user->name;
+
+                $response = [
+                    'data' => $data,
+                    'message' => 'success'
+                ];
+
+                return response()->json($response, Response::HTTP_OK);
+            }
         }
-        else{
-            return $this->sendError('Unauthorised.', ['error'=>'Unauthorised']);
-        }
+
+        $response = [
+            'message' => 'error'
+        ];
+
+        return response()->json($response, Response::HTTP_UNAUTHORIZED);
+
     }
 }
