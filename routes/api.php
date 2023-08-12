@@ -1,6 +1,9 @@
 <?php
 
-use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\RolePermissions\PermissionManagerController;
+use App\Http\Controllers\RolePermissions\RoleManagerController;
+use App\Http\Controllers\Shop\ProductController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -16,3 +19,11 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
+
+Route::post('permissions/attach', [PermissionManagerController::class, 'attach']);
+
+Route::post('roles/assign', [RoleManagerController::class, 'assign']);
+Route::post('roles', [RoleManagerController::class, 'create']);
+Route::get('roles', [RoleManagerController::class, 'getAll']);
+
+Route::post('products', [ProductController::class, 'create'])->middleware('auth');
