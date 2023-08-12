@@ -26,4 +26,7 @@ Route::post('roles/assign', [RoleManagerController::class, 'assign']);
 Route::post('roles', [RoleManagerController::class, 'create']);
 Route::get('roles', [RoleManagerController::class, 'getAll']);
 
-Route::post('products', [ProductController::class, 'create'])->middleware('auth');
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::post('products', [ProductController::class, 'create']);
+});
+
